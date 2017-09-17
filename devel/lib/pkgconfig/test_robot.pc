@@ -1,0 +1,8 @@
+prefix=/home/zqshi/dissertation_ws/devel
+
+Name: test_robot
+Description: Description of test_robot
+Version: 0.2.5
+Cflags: 
+Libs: -L/home/zqshi/dissertation_ws/devel/lib 
+Requires: 

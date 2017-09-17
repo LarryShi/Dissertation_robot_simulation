@@ -1,0 +1,50 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="model" default="$(find my_robot)/urdf/robot.urdf.xacro"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include> 
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
+  <param name="use_gui" value="$(arg gui)"/>
+   <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-z 1.2  -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+  </node>
+
+  <rosparam command="load" file="$(find my_robot)/config/robot_controllers.yaml" />
+  <!-- This node loads the two controllers into a controller manager (real or simulated). The
+  controllers are defined in config/control.yaml -->
+  <node name="r2d2_controller_spawner" pkg="controller_manager" type="spawner"
+    args="my_robot_joint_state_controller
+          my_robot_head_controller
+          my_robot_body_to_right_shoulder_controller
+          my_robot_right_shoulder_to_right_up_arm_controller
+          my_robot_right_up_arm_to_right_down_arm_controller
+          my_robot_body_to_left_shoulder_controller
+          my_robot_left_shoulder_to_left_up_arm_controller
+          my_robot_left_up_arm_to_left_down_arm_controller
+          my_robot_body_to_right_leg_joint_controller
+          my_robot_right_leg_joint_to_right_up_leg_controller
+          my_robot_right_up_leg_to_right_down_leg_controller
+          my_robot_right_down_leg_to_right_foot_controller
+          my_robot_body_to_left_leg_joint_controller
+          my_robot_left_leg_joint_to_left_up_leg_controller
+          my_robot_left_up_leg_to_left_down_leg_controller
+          my_robot_left_down_leg_to_left_foot_controller
+          --shutdown-timeout 3"/>
+</launch>

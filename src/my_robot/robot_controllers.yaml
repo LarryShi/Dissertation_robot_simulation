@@ -1,0 +1,64 @@
+robot_joint_state_controller:
+  type: "joint_state_controller/JointStateController"
+  publish_rate: 50
+
+robot_head_controller:
+  type: "position_controllers/JointPositionController"
+  joint: body_to_head
+
+body_to_right_shoulder_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: body_to_right_shoulder
+
+right_shoulder_to_right_up_arm_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: right_shoulder_to_right_up_arm
+
+right_up_arm_to_right_down_arm_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: right_up_arm_to_right_down_arm
+
+body_to_left_shoulder_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: body_to_left_shoulder
+
+left_shoulder_to_left_up_arm_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: left_shoulder_to_left_up_arm
+
+left_up_arm_to_left_down_arm_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: left_up_arm_to_left_down_arm
+
+body_to_right_leg_joint_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: body_to_right_leg_joint
+
+right_leg_joint_to_right_up_leg_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: right_leg_joint_to_right_up_leg
+
+right_up_leg_to_right_down_leg_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: right_up_leg_to_right_down_leg
+
+right_down_leg_to_right_foot_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: right_down_leg_to_right_foot
+
+body_to_left_leg_joint_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: body_to_left_leg_joint
+
+left_leg_joint_to_left_up_leg_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: left_leg_joint_to_left_up_leg
+
+left_up_leg_to_left_down_leg_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: left_up_leg_to_left_down_leg
+
+left_down_leg_to_left_foot_controller:
+  type: "position_controllers/VelocityJointInterface"
+  joint: left_down_leg_to_left_foot
+

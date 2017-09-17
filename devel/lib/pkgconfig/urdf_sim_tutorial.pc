@@ -1,0 +1,8 @@
+prefix=/home/zqshi/dissertation_ws/devel
+
+Name: urdf_sim_tutorial
+Description: Description of urdf_sim_tutorial
+Version: 0.3.0
+Cflags: 
+Libs: -L/home/zqshi/dissertation_ws/devel/lib 
+Requires: 

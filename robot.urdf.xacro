@@ -1,0 +1,367 @@
+<?xml version="1.0"?>
+<robot name="myfirst"  xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="thickness" value="0.2" />
+  <xacro:property name="bodylen" value="0.6" />
+  <xacro:property name="bodywidth" value="0.4" />
+  <xacro:property name="joint_size" value="0.01"/>
+  <xacro:property name="arm_width" value="0.1"/>
+  <xacro:property name="arm_len" value="0.3"/>
+  <xacro:property name="leg_width" value="0.18"/>
+  <xacro:property name="leg_len" value="0.3"/>
+
+  <xacro:property name="foot_len" value="0.24"/>
+  <xacro:property name="foot_width" value="0.18"/>
+  <xacro:property name="foot_high" value="0.04"/>
+
+  <xacro:property name="head_mass" value="8.26"/>
+  <xacro:property name="body_mass" value="43.46"/>
+  <xacro:property name="upper_arm_mass" value="2.71"/>
+  <xacro:property name="lower_arm_mass" value="2.23"/>
+  <xacro:property name="upper_leg_mass" value="14.16"/>
+  <xacro:property name="lower_leg_mass" value="4.33"/>
+  <xacro:property name="foot_mass" value="1.37"/>
+
+
+  <material name="color1">
+    <color rgba="0 0.4 0.8 1"/>
+  </material>
+
+  <material name="color2">
+    <color rgba="0 0.8 0.8 1"/>
+  </material>
+
+  <material name="color3">
+    <color rgba="0 1 1 1"/>
+  </material>
+
+  <material name="color4">
+    <color rgba="0 1 0.8 1"/>
+  </material>
+
+  <xacro:macro name="default_inertial" params="mass">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+  </xacro:macro>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${thickness} ${bodywidth} ${bodylen}"/>
+      </geometry>
+      <material name="color1"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${thickness} ${bodywidth} ${bodylen}"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="${body_mass}"/>
+  </link>
+
+  <link name="head">
+    <visual>
+      <geometry>
+        <box size="${thickness} ${thickness} ${thickness}"/>
+      </geometry>
+      <material name="color2"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${thickness} ${thickness} ${thickness}"/>
+      </geometry>
+    </collision>
+    <xacro:default_inertial mass="${head_mass}"/>
+  </link>
+
+
+  <joint name="body_to_head" type="revolute">
+    <parent link="base_link"/>
+    <child link="head"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.5" upper="0.5" velocity="0.5"/>
+    <origin xyz="0 0 0.4"/>
+  </joint>
+
+  <transmission name="body_to_head_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="body_to_head_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="body_to_head">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+
+  <xacro:macro name="shoulder" params="prefix reflect">
+    <link name="${prefix}_shoulder">
+      <visual>
+        <geometry>
+          <box size="${joint_size} ${joint_size} ${joint_size}"/>
+        </geometry>
+        <origin xyz="0 0.0 0.0"/>
+        <material name="color2"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${joint_size} ${joint_size} ${joint_size}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="0.01"/>
+    </link>
+
+    <joint name="body_to_${prefix}_shoulder" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_shoulder"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="1000.0" lower="${-((reflect+1)/2)*2.7}" upper="${-((reflect-1)/2)*2.7}" velocity="0.5"/>
+      <origin xyz="0 ${-0.2*reflect} 0.3"/>
+    </joint>
+    <transmission name="body_to_${prefix}_shoulder_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="body_to_${prefix}_shoulder_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="body_to_${prefix}_shoulder">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+
+
+
+  </xacro:macro>
+  <xacro:shoulder prefix="right" reflect="1" />
+  <xacro:shoulder prefix="left" reflect="-1" />
+
+
+  <xacro:macro name="arm" params="prefix reflect">
+    <link name="${prefix}_up_arm">
+      <visual>
+        <geometry>
+          <box size="${arm_width} ${arm_width} ${arm_len}"/>
+        </geometry>
+        <origin xyz="0 ${-0.05*reflect} -0.15"/>
+        <material name="color2"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${arm_width} ${arm_width} ${arm_len}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="${upper_arm_mass}"/>
+    </link>
+
+    <link name="${prefix}_down_arm">
+      <visual>
+        <geometry>
+          <box size="${arm_width} ${arm_width} ${arm_len}"/>
+        </geometry>
+        <origin xyz="0 0 -0.15"/>
+        <material name="color3"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${arm_width} ${arm_width} ${arm_len}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="${lower_arm_mass}"/>
+    </link>
+
+    <joint name="${prefix}_shoulder_to_${prefix}_up_arm" type="revolute">
+      <parent link="${prefix}_shoulder"/>
+      <child link="${prefix}_up_arm"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="1000.0" lower="-2.7" upper="0.7" velocity="0.5"/>
+      <origin xyz="0 0.0 0"/>
+    </joint>
+
+     <transmission name="${prefix}_shoulder_to_${prefix}_up_arm_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_shoulder_to_${prefix}_up_arm_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_shoulder_to_${prefix}_up_arm">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+
+
+    <joint name="${prefix}_up_arm_to_${prefix}_down_arm" type="revolute">
+      <parent link="${prefix}_up_arm"/>
+      <child link="${prefix}_down_arm"/>
+       <axis xyz="0 1 0"/>
+      <limit effort="1000.0" lower="-2.7" upper="0.5"
+      velocity="0.5"/>
+      <origin xyz="0 ${-0.05*reflect} -0.3"/>
+    </joint>
+
+    <transmission name="${prefix}_up_arm_to_${prefix}_down_arm_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_up_arm_to_${prefix}_down_arm_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_up_arm_to_${prefix}_down_arm">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+
+  </xacro:macro>
+  <xacro:arm prefix="right" reflect="1" />
+  <xacro:arm prefix="left" reflect="-1" />
+
+
+  <xacro:macro name="leg" params="prefix reflect">
+
+    <link name="${prefix}_leg_joint">
+      <visual>
+        <geometry>
+          <box size="${joint_size} ${joint_size} ${joint_size}"/>
+        </geometry>
+        <origin xyz="0 0.0 0.0"/>
+        <material name="color2"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${joint_size} ${joint_size} ${joint_size}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="0.01"/>
+    </link>
+
+    <link name="${prefix}_up_leg">
+      <visual>
+        <geometry>
+          <box size="${leg_width} ${leg_width} ${leg_len}"/>
+        </geometry>
+        <origin xyz="0 0 -0.15"/>
+        <material name="color2"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${leg_width} ${leg_width} ${leg_len}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="${upper_leg_mass}"/>
+    </link>
+
+    <link name="${prefix}_down_leg">
+      <visual>
+        <geometry>
+          <box size="${leg_width} ${leg_width} ${leg_len}"/>
+        </geometry>
+        <origin xyz="0 0 -0.15"/>
+        <material name="color3"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${leg_width} ${leg_width} ${leg_len}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="${lower_leg_mass}"/>
+    </link>
+
+    <link name="${prefix}_foot">
+      <visual>
+        <geometry>
+          <box size="${foot_len} ${foot_width} ${foot_high}"/>
+        </geometry>
+        <origin xyz="0.02 0 -0.02"/>
+        <material name="color4"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${foot_len} ${foot_width} ${foot_high}"/>
+        </geometry>
+      </collision>
+      <xacro:default_inertial mass="${foot_mass}"/>
+    </link>
+  
+
+    <joint name="body_to_${prefix}_leg_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_leg_joint"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="1000.0" lower="${-((reflect+1)/2)*2.7}" upper="${-((reflect-1)/2)*2.7}" velocity="0.5"/>
+      <origin xyz="0 ${-0.1*reflect} -0.3"/>
+    </joint>
+
+    <transmission name="body_to_${prefix}_leg_joint_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="body_to_${prefix}_leg_joint_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="body_to_${prefix}_leg_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+
+    <joint name="${prefix}_leg_joint_to_${prefix}_up_leg" type="revolute">
+      <parent link="${prefix}_leg_joint"/>
+      <child link="${prefix}_up_leg"/>
+      <origin xyz="0 0.0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="1000.0" lower="-2" upper="1.0"
+      velocity="0.5"/>
+    </joint>
+
+    <transmission name="${prefix}_leg_joint_to_${prefix}_up_leg_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_leg_joint_to_${prefix}_up_leg_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_leg_joint_to_${prefix}_up_leg">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+  
+    <joint name="${prefix}_up_leg_to_${prefix}_down_leg" type="revolute">
+      <parent link="${prefix}_up_leg"/>
+      <child link="${prefix}_down_leg"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="1000.0" lower="-0.1" upper="2.0"
+      velocity="0.5"/>
+      <origin xyz="0 0 -0.3"/>
+    </joint>
+    
+    <transmission name="${prefix}_up_leg_to_${prefix}_down_leg_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_up_leg_to_${prefix}_down_leg_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_up_leg_to_${prefix}_down_leg">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+
+    <joint name="${prefix}_down_leg_to_${prefix}_foot" type="revolute">
+      <parent link="${prefix}_down_leg"/>
+      <child link="${prefix}_foot"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="1000.0" lower="-0.5" upper="1.0"
+      velocity="0.5"/>
+      <origin xyz="0 0 -0.3"/>
+    </joint>
+    
+    <transmission name="${prefix}_down_leg_to_${prefix}_foot">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_down_leg_to_${prefix}_foot">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_down_leg_to_${prefix}_foot">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+
+  </xacro:macro>
+  <xacro:leg prefix="right" reflect="1" />
+  <xacro:leg prefix="left" reflect="-1" />
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+  </gazebo>
+</robot>

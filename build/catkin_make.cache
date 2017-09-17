@@ -1,0 +1,2 @@
+beginner_tutorials:my_robot:r2d2:test_robot:urdf_sim_tutorial
+-DCATKIN_DEVEL_PREFIX=/home/zqshi/dissertation_ws/devel -DCMAKE_INSTALL_PREFIX=/home/zqshi/dissertation_ws/install -G Unix Makefiles

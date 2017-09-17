@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="model" default="$(find my_robot)/urdf/robot.urdf.xacro"/>
+  <arg name="rvizconfig" default="$(find my_robot)/urdf.rviz" />
+
+  <include file="$(find my_robot)/launch/gazebo.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+
+  <!-- This param file is where any environment-agnostic (live or simulation)
+  configuration should be loaded, including controllers -->
+  <rosparam command="load" file="$(find my_robot)/config/robot_controllers.yaml" />
+
+  <!-- This node loads the two controllers into a controller manager (real or simulated). The
+  controllers are defined in config/control.yaml -->
+  <node name="my_robot_controller_spawner" pkg="controller_manager" type="spawner"
+    args="my_robot_joint_state_controller
+          my_robot_head_controller
+          --shutdown-timeout 3"/>
+</launch>

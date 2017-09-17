@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/talker.dir/talker.cpp.o  -o /home/zqshi/dissertation_ws/devel/lib/my_robot/talker -rdynamic 
